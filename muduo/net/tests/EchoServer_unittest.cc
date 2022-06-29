@@ -9,6 +9,8 @@
 
 #include <stdio.h>
 #include <unistd.h>
+#include <thread>
+#include <chrono>
 
 using namespace muduo;
 using namespace muduo::net;
@@ -38,10 +40,10 @@ class EchoServer
  private:
   void onConnection(const TcpConnectionPtr& conn)
   {
-    LOG_TRACE << conn->peerAddress().toIpPort() << " -> "
+    LOG_INFO << conn->peerAddress().toIpPort() << " -> "
         << conn->localAddress().toIpPort() << " is "
         << (conn->connected() ? "UP" : "DOWN");
-    LOG_INFO << conn->getTcpInfoString();
+    LOG_INFO << "tcpInfoString:" << conn->getTcpInfoString();
 
     conn->send("hello\n");
   }
@@ -49,7 +51,7 @@ class EchoServer
   void onMessage(const TcpConnectionPtr& conn, Buffer* buf, Timestamp time)
   {
     string msg(buf->retrieveAllAsString());
-    LOG_TRACE << conn->name() << " recv " << msg.size() << " bytes at " << time.toString();
+    LOG_INFO << "msg:" << msg << "==" << conn->name() << " recv " << msg.size() << " bytes at " << time.toString();
     if (msg == "exit\n")
     {
       conn->send("bye\n");
@@ -59,6 +61,9 @@ class EchoServer
     {
       loop_->quit();
     }
+
+    std::this_thread::sleep_for(std::chrono::seconds(2));
+
     conn->send(msg);
   }
 

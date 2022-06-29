@@ -234,6 +234,9 @@ void EventLoop::abortNotInLoopThread()
 void EventLoop::wakeup()
 {
   uint64_t one = 1;
+
+  // 通过wakeupFd_ 写入一个事件，将eventloop中EventLoop::loop()循环执行一次，取消poll一直等待poller_->poll，触发一次执行其他函数的操作
+
   ssize_t n = sockets::write(wakeupFd_, &one, sizeof one);
   if (n != sizeof one)
   {

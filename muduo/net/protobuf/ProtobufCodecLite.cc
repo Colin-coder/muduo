@@ -69,6 +69,7 @@ void ProtobufCodecLite::onMessage(const TcpConnectionPtr& conn,
     }
     else if (buf->readableBytes() >= implicit_cast<size_t>(kHeaderLen+len))
     {
+      // rawCb_ 收到的二进制raw数据直接通过回调发送出去处理
       if (rawCb_ && !rawCb_(conn, StringPiece(buf->peek(), kHeaderLen+len), receiveTime))
       {
         buf->retrieve(kHeaderLen+len);
@@ -76,6 +77,7 @@ void ProtobufCodecLite::onMessage(const TcpConnectionPtr& conn,
       }
       MessagePtr message(prototype_->New());
       // FIXME: can we move deserialization & callback to other thread?
+      // 解析二进制数据，解析成 proto结构体类型，再通过回调发出去处理
       ErrorCode errorCode = parse(buf->peek()+kHeaderLen, len, message.get());
       if (errorCode == kNoError)
       {

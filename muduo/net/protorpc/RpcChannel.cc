@@ -105,6 +105,7 @@ void RpcChannel::onRpcMessage(const TcpConnectionPtr& conn,
       std::unique_ptr<google::protobuf::Message> d(out.response);
       if (message.has_response())
       {
+        // 只收到回复数据，直接解析出结果来，调用回调函数
         out.response->ParseFromString(message.response());
       }
       if (out.done)
@@ -130,6 +131,8 @@ void RpcChannel::onRpcMessage(const TcpConnectionPtr& conn,
         if (method)
         {
           std::unique_ptr<google::protobuf::Message> request(service->GetRequestPrototype(method).New());
+
+          // 收到request请求数据，先解析出来，再调用CallMethod对应处理函数，处理完后调用RpcChannel::doneCallback 将结果数据返回。
           if (request->ParseFromString(message.request()))
           {
             google::protobuf::Message* response = service->GetResponsePrototype(method).New();

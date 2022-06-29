@@ -41,7 +41,7 @@ class EchoClient : noncopyable
  private:
   void onConnection(const TcpConnectionPtr& conn)
   {
-    LOG_TRACE << conn->localAddress().toIpPort() << " -> "
+    LOG_INFO << conn->localAddress().toIpPort() << " -> "
         << conn->peerAddress().toIpPort() << " is "
         << (conn->connected() ? "UP" : "DOWN");
 
@@ -56,11 +56,10 @@ class EchoClient : noncopyable
     }
     conn->send("world\n");
   }
-
   void onMessage(const TcpConnectionPtr& conn, Buffer* buf, Timestamp time)
   {
     string msg(buf->retrieveAllAsString());
-    LOG_TRACE << conn->name() << " recv " << msg.size() << " bytes at " << time.toString();
+    LOG_INFO << "msg:" << msg << "  " << conn->name() << " recv " << msg.size() << " bytes at " << time.toString();
     if (msg == "quit\n")
     {
       conn->send("bye\n");
@@ -72,7 +71,7 @@ class EchoClient : noncopyable
     }
     else
     {
-      conn->send(msg);
+//      conn->send(msg);
     }
   }
 

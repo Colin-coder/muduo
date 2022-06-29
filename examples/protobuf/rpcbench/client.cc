@@ -70,6 +70,8 @@ class RpcClient : noncopyable
     // LOG_INFO << "replied:\n" << resp->DebugString();
     // loop_->quit();
     ++count_;
+
+    // 发送50000次请求
     if (count_ < kRequests)
     {
       sendRequest();
@@ -124,13 +126,19 @@ int main(int argc, char* argv[])
       clients.emplace_back(new RpcClient(pool.getNextLoop(), serverAddr, &allConnected, &allFinished));
       clients.back()->connect();
     }
+
+    // 每个客户端连接成功，都会allConnected.countDown
+    // 等待所有连接连接成功
     allConnected.wait();
     Timestamp start(Timestamp::now());
     LOG_INFO << "all connected";
+
+    // 每个客户端发送50000次请求
     for (int i = 0; i < nClients; ++i)
     {
       clients[i]->sendRequest();
     }
+    // 等待所有客户端所有请求发送完毕
     allFinished.wait();
     Timestamp end(Timestamp::now());
     LOG_INFO << "all finished";
